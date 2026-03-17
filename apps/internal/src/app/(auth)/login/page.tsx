@@ -21,7 +21,7 @@ export default function LoginPage() {
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-white">HR Internal Tool</h1>
+          <h1 className="text-2xl font-bold text-white">HR Provider Portal</h1>
           <p className="mt-1 text-sm text-slate-400">Sign in to your HR account</p>
         </div>
 

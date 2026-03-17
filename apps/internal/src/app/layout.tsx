@@ -5,8 +5,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'HR Internal Tool',
-  description: 'Internal HR request management tool',
+  title: 'HR Provider Portal',
+  description: 'HR Provider Portal — internal request management',
 }
 
 export default function RootLayout({

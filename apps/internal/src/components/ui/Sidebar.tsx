@@ -60,7 +60,7 @@ export default function Sidebar({ profile }: SidebarProps) {
             />
           </svg>
         </div>
-        <span className="text-white font-semibold text-sm">HR Tool</span>
+        <span className="text-white font-semibold text-sm">HR Provider Portal</span>
       </div>
 
       {/* Navigation */}
