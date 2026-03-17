@@ -1,4 +1,4 @@
 {
   "installCommand": "cd ../.. && npm install",
-  "buildCommand": "npm run build --workspace=@rqm/portal"
+  "buildCommand": "../../node_modules/.bin/next build"
 }
