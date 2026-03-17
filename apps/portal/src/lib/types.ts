@@ -63,3 +63,19 @@ export interface Activity {
   created_at: string
   actor?: Profile
 }
+
+export type ArticleStatus = 'draft' | 'published' | 'retired'
+
+export interface KnowledgeArticle {
+  id: string
+  title: string
+  slug: string
+  body: string
+  status: ArticleStatus
+  category: string | null
+  author_id: string
+  created_at: string
+  updated_at: string
+  published_at: string | null
+  author?: Profile
+}

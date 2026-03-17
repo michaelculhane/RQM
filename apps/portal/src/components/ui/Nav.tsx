@@ -14,6 +14,7 @@ export default function Nav({ profile }: NavProps) {
   const navLinks = [
     { href: '/services', label: 'Services' },
     { href: '/requests', label: 'My Requests' },
+    { href: '/knowledge', label: 'Knowledge Base' },
   ]
 
   return (
