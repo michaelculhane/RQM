@@ -1,0 +1,14 @@
+{
+  "name": "rqm-demo",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:portal": "npm run dev --workspace=apps/portal",
+    "dev:internal": "npm run dev --workspace=apps/internal",
+    "build:portal": "npm run build --workspace=apps/portal",
+    "build:internal": "npm run build --workspace=apps/internal"
+  }
+}
