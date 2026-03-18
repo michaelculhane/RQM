@@ -1,6 +1,0 @@
-{
-  "/page": "app/page.js",
-  "/(auth)/login/page": "app/(auth)/login/page.js",
-  "/(internal)/requests/[id]/page": "app/(internal)/requests/[id]/page.js",
-  "/(internal)/queue/page": "app/(internal)/queue/page.js"
-}
