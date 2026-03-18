@@ -13,14 +13,14 @@ export default function RequestCard({ request }: RequestCardProps) {
   return (
     <Link
       href={`/requests/${request.id}`}
-      className="block bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md hover:border-indigo-200 transition-all group"
+      className="block bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md hover:border-brand-200 transition-all group"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-mono text-gray-400">#{shortId}</span>
           </div>
-          <h3 className="text-sm font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors truncate">
+          <h3 className="text-sm font-semibold text-gray-900 group-hover:text-brand-700 transition-colors truncate">
             {request.services?.name ?? 'Request'}
           </h3>
           {request.description && (

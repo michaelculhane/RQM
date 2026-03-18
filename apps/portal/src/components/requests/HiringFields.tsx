@@ -12,7 +12,7 @@ export default function HiringFields() {
           name="job_title"
           type="text"
           required
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           placeholder="e.g. Senior Software Engineer"
         />
       </div>
@@ -26,7 +26,7 @@ export default function HiringFields() {
           name="department"
           type="text"
           required
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           placeholder="e.g. Engineering"
         />
       </div>
@@ -39,7 +39,7 @@ export default function HiringFields() {
           id="headcount_type"
           name="headcount_type"
           required
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm bg-white focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
         >
           <option value="Backfill">Backfill</option>
           <option value="New">New</option>
@@ -54,7 +54,7 @@ export default function HiringFields() {
           id="target_start_date"
           name="target_start_date"
           type="date"
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
         />
       </div>
 
@@ -67,7 +67,7 @@ export default function HiringFields() {
           name="hiring_manager"
           type="text"
           required
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           placeholder="Full name of hiring manager"
         />
       </div>
@@ -81,7 +81,7 @@ export default function HiringFields() {
               name="is_budgeted"
               value="true"
               defaultChecked
-              className="text-indigo-600 focus:ring-indigo-500"
+              className="text-brand-600 focus:ring-brand-500"
             />
             Yes
           </label>
@@ -90,7 +90,7 @@ export default function HiringFields() {
               type="radio"
               name="is_budgeted"
               value="false"
-              className="text-indigo-600 focus:ring-indigo-500"
+              className="text-brand-600 focus:ring-brand-500"
             />
             No
           </label>

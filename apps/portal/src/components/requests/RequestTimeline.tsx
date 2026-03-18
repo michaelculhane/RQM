@@ -134,7 +134,7 @@ export default function RequestTimeline({
                   )}
                   <div className="relative flex gap-3">
                     {/* Avatar */}
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 text-xs font-semibold">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-700 text-xs font-semibold">
                       {(comment.author?.full_name ?? 'U').charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">

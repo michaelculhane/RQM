@@ -45,13 +45,13 @@ export default async function KnowledgePage({
           name="q"
           defaultValue={searchParams.q ?? ''}
           placeholder="Search articles…"
-          className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
         />
         {categories.length > 0 && (
           <select
             name="category"
             defaultValue={searchParams.category ?? ''}
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm bg-white shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="rounded-md border border-gray-300 px-3 py-2 text-sm bg-white shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           >
             <option value="">All categories</option>
             {categories.map((c) => (
@@ -61,7 +61,7 @@ export default async function KnowledgePage({
         )}
         <button
           type="submit"
-          className="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors"
+          className="px-4 py-2 rounded-md bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition-colors"
         >
           Search
         </button>
@@ -89,11 +89,11 @@ export default async function KnowledgePage({
             <Link
               key={article.id}
               href={`/knowledge/${article.slug}`}
-              className="block bg-white rounded-lg border border-gray-200 px-6 py-5 hover:border-indigo-300 hover:shadow-sm transition-all"
+              className="block bg-white rounded-lg border border-gray-200 px-6 py-5 hover:border-brand-300 hover:shadow-sm transition-all"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-base font-semibold text-gray-900 group-hover:text-indigo-600">
+                  <h2 className="text-base font-semibold text-gray-900 group-hover:text-brand-600">
                     {article.title}
                   </h2>
                   {article.body && (
@@ -103,7 +103,7 @@ export default async function KnowledgePage({
                   )}
                   <div className="mt-2 flex items-center gap-3 text-xs text-gray-400">
                     {article.category && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-medium">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 font-medium">
                         {article.category}
                       </span>
                     )}

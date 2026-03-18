@@ -35,7 +35,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         {/* Header */}
         <div className="mb-6 pb-6 border-b border-gray-100">
           {a.category && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 mb-3">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-700 mb-3">
               {a.category}
             </span>
           )}

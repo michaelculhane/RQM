@@ -22,7 +22,7 @@ export default function Input({ label, error, id, className = '', ...props }: In
           focus:outline-none focus:ring-1
           ${error
             ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-            : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
+            : 'border-gray-300 focus:border-brand-500 focus:ring-brand-500'
           }
           disabled:bg-gray-50 disabled:text-gray-500
           ${className}

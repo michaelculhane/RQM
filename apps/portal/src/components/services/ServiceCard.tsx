@@ -10,7 +10,7 @@ export default function ServiceCard({ service }: ServiceCardProps) {
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 flex flex-col gap-4 hover:shadow-md transition-shadow">
       <div className="flex-1">
         {service.teams && (
-          <span className="inline-block text-xs font-medium text-indigo-600 bg-indigo-50 rounded-full px-2.5 py-0.5 mb-3">
+          <span className="inline-block text-xs font-medium text-brand-600 bg-brand-50 rounded-full px-2.5 py-0.5 mb-3">
             {service.teams.name}
           </span>
         )}
@@ -22,7 +22,7 @@ export default function ServiceCard({ service }: ServiceCardProps) {
 
       <Link
         href={`/requests/new?service=${service.slug}`}
-        className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        className="inline-flex items-center justify-center rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-700 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
       >
         Submit Request
       </Link>

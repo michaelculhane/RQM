@@ -16,7 +16,7 @@ export default function DirectDepositFields() {
           name="bank_name"
           type="text"
           required
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           placeholder="e.g. TD Bank, RBC, Chase"
         />
       </div>
@@ -29,7 +29,7 @@ export default function DirectDepositFields() {
           id="account_type"
           name="account_type"
           required
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm bg-white focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
         >
           <option value="Chequing">Chequing</option>
           <option value="Savings">Savings</option>
@@ -45,7 +45,7 @@ export default function DirectDepositFields() {
           name="effective_date"
           type="date"
           required
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
         />
       </div>
     </div>

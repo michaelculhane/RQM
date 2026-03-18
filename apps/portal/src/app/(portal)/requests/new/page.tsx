@@ -17,7 +17,7 @@ export default async function NewRequestPage({ searchParams }: NewRequestPagePro
         <p className="mt-1 text-sm text-gray-500">Please select a service from the catalog.</p>
         <Link
           href="/services"
-          className="mt-4 inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500"
+          className="mt-4 inline-flex items-center text-sm font-medium text-brand-600 hover:text-brand-500"
         >
           Browse Services
         </Link>
@@ -42,7 +42,7 @@ export default async function NewRequestPage({ searchParams }: NewRequestPagePro
         </p>
         <Link
           href="/services"
-          className="mt-4 inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500"
+          className="mt-4 inline-flex items-center text-sm font-medium text-brand-600 hover:text-brand-500"
         >
           Browse Services
         </Link>

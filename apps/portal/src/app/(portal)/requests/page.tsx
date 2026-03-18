@@ -40,7 +40,7 @@ export default async function RequestsPage() {
         </div>
         <Link
           href="/services"
-          className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          className="inline-flex items-center rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
         >
           New Request
         </Link>
@@ -55,7 +55,7 @@ export default async function RequestsPage() {
           <p className="mt-1 text-sm text-gray-500">Get started by submitting a new HR request.</p>
           <Link
             href="/services"
-            className="mt-4 inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors"
+            className="mt-4 inline-flex items-center rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 transition-colors"
           >
             Browse Services
           </Link>
