@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import { createClient } from '@/lib/supabase/server'
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 const SYSTEM_PROMPT = `You are an HR assistant for company employees. You can answer HR questions using the knowledge base and submit HR service requests on behalf of the employee.
 
@@ -46,39 +46,46 @@ Available HR services and their required fields:
 
 Be concise and professional. Today's date is ${new Date().toISOString().split('T')[0]}.`
 
-const tools: Anthropic.Tool[] = [
+const tools: OpenAI.Chat.ChatCompletionTool[] = [
   {
-    name: 'search_knowledge_base',
-    description: 'Search published HR knowledge base articles for policies, procedures, benefits information, and other HR-related topics. Call this before answering any HR policy question.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        query: { type: 'string', description: 'Keywords or question to search for' },
+    type: 'function',
+    function: {
+      name: 'search_knowledge_base',
+      description: 'Search published HR knowledge base articles for policies, procedures, benefits information, and other HR-related topics. Call this before answering any HR policy question.',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: 'Keywords or question to search for' },
+        },
+        required: ['query'],
       },
-      required: ['query'],
     },
   },
   {
-    name: 'submit_hr_request',
-    description: 'Submit an HR service request on behalf of the employee. Only call this after the employee has confirmed all details.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        service_slug: {
-          type: 'string',
-          enum: ['benefits', 'system-access', 'direct-deposit', 'hiring', 'address-change'],
-          description: 'Which HR service to request',
+    type: 'function',
+    function: {
+      name: 'submit_hr_request',
+      description: 'Submit an HR service request on behalf of the employee. Only call this after the employee has confirmed all details.',
+      parameters: {
+        type: 'object',
+        properties: {
+          service_slug: {
+            type: 'string',
+            enum: ['benefits', 'system-access', 'direct-deposit', 'hiring', 'address-change'],
+            description: 'Which HR service to request',
+          },
+          description: {
+            type: 'string',
+            description: 'A clear plain-English description of what is being requested',
+          },
+          fields: {
+            type: 'object',
+            description: 'Service-specific field key-value pairs',
+            additionalProperties: { type: 'string' },
+          },
         },
-        description: {
-          type: 'string',
-          description: 'A clear plain-English description of what is being requested',
-        },
-        fields: {
-          type: 'object',
-          description: 'Service-specific field key-value pairs',
-        },
+        required: ['service_slug', 'description', 'fields'],
       },
-      required: ['service_slug', 'description', 'fields'],
     },
   },
 ]
@@ -88,7 +95,9 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new Response('Unauthorized', { status: 401 })
 
-  const { messages } = await req.json() as { messages: Anthropic.MessageParam[] }
+  const { messages } = await req.json() as {
+    messages: { role: 'user' | 'assistant'; content: string }[]
+  }
 
   const encoder = new TextEncoder()
 
@@ -99,95 +108,111 @@ export async function POST(req: NextRequest) {
       }
 
       try {
-        let conversation: Anthropic.MessageParam[] = [...messages]
+        const conversation: OpenAI.Chat.ChatCompletionMessageParam[] = [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...messages,
+        ]
 
-        // Agentic loop — runs until end_turn or no more tool calls
+        // Agentic loop — continues until no more tool calls
         while (true) {
-          const claudeStream = anthropic.messages.stream({
-            model: 'claude-opus-4-6',
-            max_tokens: 4096,
-            thinking: { type: 'adaptive' },
-            system: SYSTEM_PROMPT,
-            tools,
+          const stream = await openai.chat.completions.create({
+            model: 'gpt-4o',
+            stream: true,
             messages: conversation,
+            tools,
+            tool_choice: 'auto',
           })
 
-          // Stream text deltas to the client as they arrive
-          for await (const event of claudeStream) {
-            if (
-              event.type === 'content_block_delta' &&
-              event.delta.type === 'text_delta'
-            ) {
-              send({ type: 'text', text: event.delta.text })
+          // Accumulate streamed content and tool calls
+          let assistantText = ''
+          const toolCallsMap: Record<number, { id: string; name: string; args: string }> = {}
+          let finishReason: string | null = null
+
+          for await (const chunk of stream) {
+            const delta = chunk.choices[0]?.delta
+            if (!delta) continue
+
+            if (delta.content) {
+              assistantText += delta.content
+              send({ type: 'text', text: delta.content })
+            }
+
+            if (delta.tool_calls) {
+              for (const tc of delta.tool_calls) {
+                if (!toolCallsMap[tc.index]) {
+                  toolCallsMap[tc.index] = { id: '', name: '', args: '' }
+                }
+                if (tc.id) toolCallsMap[tc.index].id = tc.id
+                if (tc.function?.name) toolCallsMap[tc.index].name += tc.function.name
+                if (tc.function?.arguments) toolCallsMap[tc.index].args += tc.function.arguments
+              }
+            }
+
+            if (chunk.choices[0]?.finish_reason) {
+              finishReason = chunk.choices[0].finish_reason
             }
           }
 
-          const message = await claudeStream.finalMessage()
+          const toolCalls = Object.values(toolCallsMap)
 
-          if (message.stop_reason === 'end_turn') break
+          if (finishReason !== 'tool_calls' || toolCalls.length === 0) break
 
-          if (message.stop_reason === 'tool_use') {
-            // Append full assistant turn (including any thinking blocks)
-            conversation.push({ role: 'assistant', content: message.content })
+          // Append assistant turn with tool_calls
+          conversation.push({
+            role: 'assistant',
+            content: assistantText || null,
+            tool_calls: toolCalls.map(tc => ({
+              id: tc.id,
+              type: 'function' as const,
+              function: { name: tc.name, arguments: tc.args },
+            })),
+          })
 
-            const toolResults: Anthropic.ToolResultBlockParam[] = []
+          // Execute each tool and collect results
+          for (const tc of toolCalls) {
+            let result: string
+            const args = JSON.parse(tc.args)
 
-            for (const block of message.content) {
-              if (block.type !== 'tool_use') continue
+            if (tc.name === 'search_knowledge_base') {
+              send({ type: 'status', text: 'Searching knowledge base…' })
 
-              let result: string
+              const { data: articles } = await supabase
+                .from('knowledge_articles')
+                .select('title, body, category')
+                .eq('status', 'published')
+                .or(`title.ilike.%${args.query}%,body.ilike.%${args.query}%`)
+                .limit(3)
 
-              if (block.name === 'search_knowledge_base') {
-                send({ type: 'status', text: 'Searching knowledge base…' })
-                const input = block.input as { query: string }
+              result = articles?.length
+                ? articles
+                    .map(a => `### ${a.title}${a.category ? ` (${a.category})` : ''}\n${a.body}`)
+                    .join('\n\n---\n\n')
+                : 'No articles found. Try different keywords.'
 
-                const { data: articles } = await supabase
-                  .from('knowledge_articles')
-                  .select('title, body, category')
-                  .eq('status', 'published')
-                  .or(`title.ilike.%${input.query}%,body.ilike.%${input.query}%`)
-                  .limit(3)
+            } else if (tc.name === 'submit_hr_request') {
+              send({ type: 'status', text: 'Submitting request…' })
 
-                result = articles?.length
-                  ? articles.map(a =>
-                      `### ${a.title}${a.category ? ` (${a.category})` : ''}\n${a.body}`
-                    ).join('\n\n---\n\n')
-                  : 'No articles found. Try different keywords.'
-
-              } else if (block.name === 'submit_hr_request') {
-                send({ type: 'status', text: 'Submitting request…' })
-                const input = block.input as {
-                  service_slug: string
-                  description: string
-                  fields: Record<string, string>
-                }
-
-                const { error } = await supabase.rpc('create_request', {
-                  p_service_slug: input.service_slug,
-                  p_description: input.description,
-                  p_fields: input.fields,
-                })
-
-                if (error) {
-                  result = `Failed to submit: ${error.message}`
-                } else {
-                  result = 'Request submitted successfully.'
-                  send({ type: 'request_submitted' })
-                }
-              } else {
-                result = 'Unknown tool.'
-              }
-
-              toolResults.push({
-                type: 'tool_result',
-                tool_use_id: block.id,
-                content: result,
+              const { error } = await supabase.rpc('create_request', {
+                p_service_slug: args.service_slug,
+                p_description: args.description,
+                p_fields: args.fields,
               })
+
+              if (error) {
+                result = `Failed to submit: ${error.message}`
+              } else {
+                result = 'Request submitted successfully.'
+                send({ type: 'request_submitted' })
+              }
+            } else {
+              result = 'Unknown tool.'
             }
 
-            conversation.push({ role: 'user', content: toolResults })
-          } else {
-            break
+            conversation.push({
+              role: 'tool',
+              tool_call_id: tc.id,
+              content: result,
+            })
           }
         }
 
