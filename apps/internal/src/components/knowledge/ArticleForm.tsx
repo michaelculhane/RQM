@@ -133,7 +133,7 @@ export default function ArticleForm({ article, onSave }: ArticleFormProps) {
           <>
             <textarea name="body" value={body} onChange={() => {}} className="hidden" />
             <div
-              className="w-full min-h-[18rem] rounded-md border border-gray-200 bg-gray-50 px-4 py-3 prose prose-sm max-w-none"
+              className="w-full min-h-[18rem] rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 leading-relaxed"
               dangerouslySetInnerHTML={{ __html: marked.parse(body) as string }}
             />
           </>

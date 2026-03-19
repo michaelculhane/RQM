@@ -50,7 +50,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
 
         {/* Body */}
         <div
-          className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-a:text-brand-600"
+          className="article-body text-sm text-gray-700 leading-relaxed"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </article>
