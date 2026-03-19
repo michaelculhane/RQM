@@ -193,24 +193,9 @@ export default function ChatWidget() {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
             {messages.length === 0 && (
-              <div className="text-center mt-6 space-y-3">
-                <p className="text-xs text-gray-500">Hi! I can help you with HR questions and service requests.</p>
-                <div className="flex flex-col gap-1.5">
-                  {[
-                    'How does open enrollment work?',
-                    'I need to update my direct deposit',
-                    'Request system access to Salesforce',
-                  ].map(suggestion => (
-                    <button
-                      key={suggestion}
-                      onClick={() => { setInput(suggestion) }}
-                      className="text-xs text-left px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:border-brand-300 hover:text-brand-700 hover:bg-brand-50 transition-colors"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <p className="text-xs text-gray-400 text-center mt-8">
+                Ask me anything about HR policies or services.
+              </p>
             )}
 
             {messages.map((msg, i) => (
