@@ -21,5 +21,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require('@tailwindcss/typography')],
+  plugins: [require(require.resolve('@tailwindcss/typography', { paths: [__dirname] }))],
 }
