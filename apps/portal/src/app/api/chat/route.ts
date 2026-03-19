@@ -4,47 +4,21 @@ import { createClient } from '@/lib/supabase/server'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
-const SYSTEM_PROMPT = `You are an HR assistant for company employees. You can answer HR questions using the knowledge base and submit HR service requests on behalf of the employee.
+const SYSTEM_PROMPT = `You are an HR assistant for company employees. You answer HR questions using the knowledge base and direct employees to the right form when they want to submit a request.
 
 When answering HR policy questions, always search the knowledge base first.
 
-Before submitting any request, confirm all details with the employee. After confirming, submit immediately without asking again.
+When an employee wants to submit an HR request, give them the direct link to the form — do not collect information or submit on their behalf.
 
-Available HR services and their required fields:
+Request form links (use markdown link syntax):
+- Benefits inquiry → /requests/new?service=benefits
+- IT / system access → /requests/new?service=system-access
+- Direct deposit change → /requests/new?service=direct-deposit
+- Hiring request → /requests/new?service=hiring
+- Address change → /requests/new?service=address-change
+- Browse all services → /services
 
-**Benefits inquiry** (service_slug: "benefits")
-- inquiry_type: "Enrollment" | "Coverage question" | "Dependent change" | "Other"
-- coverage_type: "Medical" | "Dental" | "Vision" | "All"
-- preferred_contact: how they prefer to be contacted
-
-**System / IT access** (service_slug: "system-access")
-- system_name: name of the system or application
-- access_type: "New access" | "Modify" | "Remove"
-- justification: business reason
-- required_by_date: YYYY-MM-DD (optional)
-
-**Direct deposit change** (service_slug: "direct-deposit")
-- bank_name: name of the bank
-- account_type: "Chequing" | "Savings"
-- effective_date: YYYY-MM-DD
-
-**Hiring request** (service_slug: "hiring")
-- job_title: position title
-- department: department name
-- headcount_type: "Backfill" | "New"
-- hiring_manager: full name of hiring manager
-- is_budgeted: "true" | "false"
-- target_start_date: YYYY-MM-DD (optional)
-
-**Address change** (service_slug: "address-change")
-- address_line1: street address
-- address_line2: suite/unit (optional)
-- city
-- province_state
-- postal_zip
-- effective_date: YYYY-MM-DD
-
-Be concise and professional. Today's date is ${new Date().toISOString().split('T')[0]}.`
+Be concise and professional.`
 
 const tools: OpenAI.Chat.ChatCompletionTool[] = [
   {
@@ -58,33 +32,6 @@ const tools: OpenAI.Chat.ChatCompletionTool[] = [
           query: { type: 'string', description: 'Keywords or question to search for' },
         },
         required: ['query'],
-      },
-    },
-  },
-  {
-    type: 'function',
-    function: {
-      name: 'submit_hr_request',
-      description: 'Submit an HR service request on behalf of the employee. Only call this after the employee has confirmed all details.',
-      parameters: {
-        type: 'object',
-        properties: {
-          service_slug: {
-            type: 'string',
-            enum: ['benefits', 'system-access', 'direct-deposit', 'hiring', 'address-change'],
-            description: 'Which HR service to request',
-          },
-          description: {
-            type: 'string',
-            description: 'A clear plain-English description of what is being requested',
-          },
-          fields: {
-            type: 'object',
-            description: 'Service-specific field key-value pairs',
-            additionalProperties: { type: 'string' },
-          },
-        },
-        required: ['service_slug', 'description', 'fields'],
       },
     },
   },
@@ -113,7 +60,6 @@ export async function POST(req: NextRequest) {
           ...messages,
         ]
 
-        // Agentic loop — continues until no more tool calls
         while (true) {
           const stream = await openai.chat.completions.create({
             model: 'gpt-4o',
@@ -123,7 +69,6 @@ export async function POST(req: NextRequest) {
             tool_choice: 'auto',
           })
 
-          // Accumulate streamed content and tool calls
           let assistantText = ''
           const toolCallsMap: Record<number, { id: string; name: string; args: string }> = {}
           let finishReason: string | null = null
@@ -157,7 +102,6 @@ export async function POST(req: NextRequest) {
 
           if (finishReason !== 'tool_calls' || toolCalls.length === 0) break
 
-          // Append assistant turn with tool_calls
           conversation.push({
             role: 'assistant',
             content: assistantText || null,
@@ -168,7 +112,6 @@ export async function POST(req: NextRequest) {
             })),
           })
 
-          // Execute each tool and collect results
           for (const tc of toolCalls) {
             let result: string
             const args = JSON.parse(tc.args)
@@ -188,22 +131,6 @@ export async function POST(req: NextRequest) {
                     .map(a => `### ${a.title}${a.category ? ` (${a.category})` : ''}\n${a.body}`)
                     .join('\n\n---\n\n')
                 : 'No articles found. Try different keywords.'
-
-            } else if (tc.name === 'submit_hr_request') {
-              send({ type: 'status', text: 'Submitting request…' })
-
-              const { error } = await supabase.rpc('create_request', {
-                p_service_slug: args.service_slug,
-                p_description: args.description,
-                p_fields: args.fields,
-              })
-
-              if (error) {
-                result = `Failed to submit: ${error.message}`
-              } else {
-                result = 'Request submitted successfully.'
-                send({ type: 'request_submitted' })
-              }
             } else {
               result = 'Unknown tool.'
             }

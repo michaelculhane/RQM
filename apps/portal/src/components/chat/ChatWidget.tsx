@@ -1,5 +1,6 @@
 'use client'
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { marked } from 'marked'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -217,15 +218,21 @@ export default function ChatWidget() {
                 key={i}
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <div
-                  className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
-                    msg.role === 'user'
-                      ? 'bg-brand-600 text-white rounded-br-sm'
-                      : 'bg-gray-100 text-gray-800 rounded-bl-sm'
-                  }`}
-                >
-                  {msg.content || (msg.streaming ? <SpinnerDots /> : '')}
-                </div>
+                {msg.role === 'user' ? (
+                  <div className="max-w-[85%] px-3 py-2 rounded-2xl rounded-br-sm text-sm leading-relaxed bg-brand-600 text-white">
+                    {msg.content}
+                  </div>
+                ) : (
+                  <div className="max-w-[85%] px-3 py-2 rounded-2xl rounded-bl-sm text-sm leading-relaxed bg-gray-100 text-gray-800">
+                    {msg.content
+                      ? <div
+                          className="chat-md"
+                          dangerouslySetInnerHTML={{ __html: marked.parse(msg.content) as string }}
+                        />
+                      : msg.streaming ? <SpinnerDots /> : null
+                    }
+                  </div>
+                )}
               </div>
             ))}
 
