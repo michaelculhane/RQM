@@ -1,5 +1,6 @@
 'use client'
 import { useRef, useState, useTransition } from 'react'
+import { marked } from 'marked'
 import type { KnowledgeArticle } from '@/lib/types'
 
 interface ArticleFormProps {
@@ -20,6 +21,8 @@ export default function ArticleForm({ article, onSave }: ArticleFormProps) {
   const [isPending, startTransition] = useTransition()
 
   const status = article?.status ?? 'draft'
+  const [body, setBody] = useState(article?.body ?? '')
+  const [tab, setTab] = useState<'write' | 'preview'>('write')
 
   function submit(action: string) {
     setError(null)
@@ -93,19 +96,49 @@ export default function ArticleForm({ article, onSave }: ArticleFormProps) {
 
       {/* Body */}
       <div>
-        <label htmlFor="body" className="block text-sm font-medium text-gray-700 mb-1">
-          Content <span className="text-red-500">*</span>
-        </label>
-        <textarea
-          id="body"
-          name="body"
-          required
-          rows={18}
-          defaultValue={article?.body ?? ''}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm font-mono focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-y"
-          placeholder="Write the article content here…"
-        />
-        <p className="mt-1 text-xs text-gray-400">Plain text. Line breaks are preserved.</p>
+        <div className="flex items-center justify-between mb-1">
+          <label htmlFor="body" className="block text-sm font-medium text-gray-700">
+            Content <span className="text-red-500">*</span>
+          </label>
+          <div className="flex rounded-md border border-gray-200 text-xs overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setTab('write')}
+              className={`px-3 py-1 ${tab === 'write' ? 'bg-gray-100 font-medium text-gray-800' : 'text-gray-500 hover:bg-gray-50'}`}
+            >
+              Write
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab('preview')}
+              className={`px-3 py-1 border-l border-gray-200 ${tab === 'preview' ? 'bg-gray-100 font-medium text-gray-800' : 'text-gray-500 hover:bg-gray-50'}`}
+            >
+              Preview
+            </button>
+          </div>
+        </div>
+
+        {tab === 'write' ? (
+          <textarea
+            id="body"
+            name="body"
+            required
+            rows={18}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm font-mono focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-y"
+            placeholder="Write the article content here using Markdown…"
+          />
+        ) : (
+          <>
+            <textarea name="body" value={body} onChange={() => {}} className="hidden" />
+            <div
+              className="w-full min-h-[18rem] rounded-md border border-gray-200 bg-gray-50 px-4 py-3 prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{ __html: marked.parse(body) as string }}
+            />
+          </>
+        )}
+        <p className="mt-1 text-xs text-gray-400">Markdown supported — **bold**, *italic*, # headings, - lists, `code`, [links](url)</p>
       </div>
 
       {/* Actions */}

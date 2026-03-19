@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
 import type { KnowledgeArticle } from '@/lib/types'
+import { marked } from 'marked'
 
 export default async function ArticlePage({ params }: { params: { slug: string } }) {
   const supabase = createClient()
@@ -17,6 +18,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   if (!article) notFound()
 
   const a = article as KnowledgeArticle
+  const html = marked.parse(a.body) as string
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -47,9 +49,10 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         </div>
 
         {/* Body */}
-        <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap leading-relaxed">
-          {a.body}
-        </div>
+        <div
+          className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-a:text-brand-600"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
       </article>
     </div>
   )
