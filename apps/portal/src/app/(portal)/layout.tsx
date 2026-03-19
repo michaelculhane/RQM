@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Nav from '@/components/ui/Nav'
+import ChatWidget from '@/components/chat/ChatWidget'
 import type { Profile } from '@/lib/types'
 
 export default async function PortalLayout({
@@ -39,6 +40,7 @@ export default async function PortalLayout({
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
+      <ChatWidget />
     </div>
   )
 }
