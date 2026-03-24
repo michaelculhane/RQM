@@ -28,22 +28,24 @@ export default async function RequestDetailPage({ params }: RequestPageProps) {
   const { id } = params
 
   // 1. Fetch the main request with joins
-  const { data: request, error } = await supabase
-    .from('requests')
+  const { data: task, error } = await supabase
+    .from('tasks')
     .select(`
       *,
-      services(*),
       teams(*),
-      opener:profiles!requests_opened_by_fkey(*),
-      assignee:profiles!requests_assigned_to_fkey(*)
+      opener:profiles!tasks_opened_by_fkey(*),
+      assignee:profiles!tasks_assigned_to_fkey(*),
+      requests!requests_task_fkey(service_id, services(*))
     `)
     .eq('id', id)
     .single()
 
-  if (error || !request) {
+  if (error || !task) {
     notFound()
   }
 
+  const r = Array.isArray(task.requests) ? task.requests[0] : task.requests
+  const request = { ...task, service_id: r?.service_id, services: r?.services }
   const req = request as Request
 
   // 2. Fetch child table data

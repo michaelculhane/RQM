@@ -1,4 +1,27 @@
 export type Role = 'employee' | 'hr_agent' | 'hr_admin'
+
+export interface CustomRole {
+  id: string
+  name: string
+  description: string | null
+  created_at: string
+  team_roles?: { team_id: string; teams?: Team }[]
+  role_permissions?: RolePermission[]
+}
+
+export interface RolePermission {
+  id: string
+  role_id: string
+  table_name: string
+  can_read: boolean
+  can_create: boolean
+  can_update: boolean
+  can_delete: boolean
+  status_in: string[] | null
+  service_slug: string | null
+  opened_by_self: boolean
+}
+
 export type Status = 'open' | 'in_progress' | 'pending_employee' | 'resolved' | 'closed'
 export type Priority = 'low' | 'medium' | 'high' | 'urgent'
 
@@ -40,6 +63,7 @@ export interface Profile {
   role: Role
   team_id: string | null
   teams?: Team
+  profile_roles?: { role_id: string; roles?: CustomRole }[]
 }
 
 export interface Request {

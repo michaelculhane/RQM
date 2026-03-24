@@ -23,3 +23,4 @@ export async function updateUserRole(userId: string, role: string, teamId: strin
   revalidatePath('/admin/users')
   return { success: true }
 }
+

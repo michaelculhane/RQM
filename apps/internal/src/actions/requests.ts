@@ -13,7 +13,7 @@ export async function updateStatus(requestId: string, newStatus: string, oldStat
   }
 
   const { error } = await supabase
-    .from('requests')
+    .from('tasks')
     .update(updates)
     .eq('id', requestId)
   if (error) return { error: error.message }
@@ -36,7 +36,7 @@ export async function updatePriority(requestId: string, newPriority: string, old
   if (!user) return { error: 'Not authenticated' }
 
   const { error } = await supabase
-    .from('requests')
+    .from('tasks')
     .update({ priority: newPriority })
     .eq('id', requestId)
   if (error) return { error: error.message }
@@ -59,7 +59,7 @@ export async function assignRequest(requestId: string, assigneeId: string | null
   if (!user) return { error: 'Not authenticated' }
 
   const { error } = await supabase
-    .from('requests')
+    .from('tasks')
     .update({ assigned_to: assigneeId })
     .eq('id', requestId)
   if (error) return { error: error.message }
