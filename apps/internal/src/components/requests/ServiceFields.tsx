@@ -37,14 +37,20 @@ const fieldsBySlug: Record<string, FieldDef[]> = {
     { key: 'address_line1', label: 'Address Line 1' },
     { key: 'address_line2', label: 'Address Line 2' },
     { key: 'city', label: 'City' },
-    { key: 'province_state', label: 'Province / State' },
-    { key: 'postal_zip', label: 'Postal / ZIP Code' },
+    { key: 'province_state', label: 'State' },
+    { key: 'postal_zip', label: 'ZIP Code' },
     { key: 'effective_date', label: 'Effective Date' },
   ],
   'direct-deposit-change': [
     { key: 'bank_name', label: 'Bank Name' },
     { key: 'account_type', label: 'Account Type' },
     { key: 'effective_date', label: 'Effective Date' },
+  ],
+  'name-change': [
+    { key: 'new_last_name', label: 'New Last Name' },
+  ],
+  'where-is-my-wgi': [
+    { key: 'eligibility_date', label: 'Believed WGI Eligibility Date' },
   ],
 }
 

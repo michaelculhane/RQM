@@ -8,6 +8,8 @@ import BenefitsFields from './BenefitsFields'
 import SystemAccessFields from './SystemAccessFields'
 import AddressFields from './AddressFields'
 import DirectDepositFields from './DirectDepositFields'
+import NameChangeFields from './NameChangeFields'
+import WgiFields from './WgiFields'
 
 interface RequestFormProps {
   service: Service
@@ -19,6 +21,8 @@ const SLUG_FIELD_MAP: Record<string, React.ReactNode> = {
   'system-access': <SystemAccessFields />,
   'change-of-address': <AddressFields />,
   'direct-deposit': <DirectDepositFields />,
+  'name-change': <NameChangeFields />,
+  'where-is-my-wgi': <WgiFields />,
 }
 
 // Also match partial slugs
