@@ -163,6 +163,31 @@ export type ServiceDetails =
   | AddressDetails
   | DirectDepositDetails
 
+export type FormFieldType = 'text' | 'textarea' | 'date' | 'select' | 'checkbox' | 'file'
+
+export interface FormTemplateField {
+  id: string
+  form_template_id: string
+  field_name: string
+  label: string
+  field_type: FormFieldType
+  options: string[] | null
+  is_required: boolean
+  is_pii: boolean
+  display_order: number
+  request_field_mapping: { target_table: string; target_field: string } | null
+}
+
+export interface FormTemplate {
+  id: string
+  name: string
+  description: string | null
+  is_active: boolean
+  created_by: string | null
+  updated_at: string
+  form_template_fields?: FormTemplateField[]
+}
+
 export type ArticleStatus = 'draft' | 'published' | 'retired'
 
 export interface KnowledgeArticle {
