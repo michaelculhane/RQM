@@ -188,6 +188,35 @@ export interface FormTemplate {
   form_template_fields?: FormTemplateField[]
 }
 
+export type RequestTaskStatus = 'open' | 'completed' | 'cancelled'
+
+export interface RequestTask {
+  id: string
+  request_id: string
+  title: string
+  form_template_id: string | null
+  assigned_to: string | null
+  due_date: string | null
+  status: RequestTaskStatus
+  completed_at: string | null
+  created_at: string
+  assignee?: Profile
+  form_templates?: FormTemplate | null
+}
+
+export interface Announcement {
+  id: string
+  title: string
+  body: string | null
+  image_url: string | null
+  color_theme: string
+  cta_label: string | null
+  cta_url: string | null
+  sort_order: number
+  is_active: boolean
+  created_at: string
+}
+
 export type ArticleStatus = 'draft' | 'published' | 'retired'
 
 export interface KnowledgeArticle {

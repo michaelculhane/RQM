@@ -74,7 +74,7 @@ export default function ArticleForm({ article, onSave }: ArticleFormProps) {
           type="text"
           required
           defaultValue={article?.title ?? ''}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           placeholder="Article title"
         />
       </div>
@@ -89,7 +89,7 @@ export default function ArticleForm({ article, onSave }: ArticleFormProps) {
           name="category"
           type="text"
           defaultValue={article?.category ?? ''}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           placeholder="e.g. Benefits, Payroll, Onboarding"
         />
       </div>
@@ -126,7 +126,7 @@ export default function ArticleForm({ article, onSave }: ArticleFormProps) {
             rows={18}
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm font-mono focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-y"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm font-mono focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 resize-y"
             placeholder="Write the article content here using Markdown…"
           />
         ) : (

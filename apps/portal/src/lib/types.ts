@@ -114,6 +114,19 @@ export interface RequestTask {
   }
 }
 
+export interface Announcement {
+  id: string
+  title: string
+  body: string | null
+  image_url: string | null
+  color_theme: string
+  cta_label: string | null
+  cta_url: string | null
+  sort_order: number
+  is_active: boolean
+  created_at: string
+}
+
 export type ArticleStatus = 'draft' | 'published' | 'retired'
 
 export interface KnowledgeArticle {

@@ -14,7 +14,7 @@ interface DashboardPageProps {
 }
 
 const STATUS_CONFIG: Record<Status, { label: string; color: string; bg: string }> = {
-  open:             { label: 'Open',             color: 'text-blue-600',   bg: 'bg-blue-500' },
+  open:             { label: 'Open',             color: 'text-brand-600',  bg: 'bg-brand-500' },
   in_progress:      { label: 'In Progress',      color: 'text-amber-600',  bg: 'bg-amber-500' },
   pending_employee: { label: 'Pending Employee', color: 'text-orange-600', bg: 'bg-orange-500' },
   resolved:         { label: 'Resolved',         color: 'text-green-600',  bg: 'bg-green-500' },
@@ -23,7 +23,7 @@ const STATUS_CONFIG: Record<Status, { label: string; color: string; bg: string }
 
 const PRIORITY_CONFIG = {
   low:    { label: 'Low',    color: 'text-gray-500',  bg: 'bg-gray-400' },
-  medium: { label: 'Medium', color: 'text-blue-600',  bg: 'bg-blue-400' },
+  medium: { label: 'Medium', color: 'text-brand-600', bg: 'bg-brand-400' },
   high:   { label: 'High',   color: 'text-orange-600',bg: 'bg-orange-400' },
   urgent: { label: 'Urgent', color: 'text-red-600',   bg: 'bg-red-500' },
 }

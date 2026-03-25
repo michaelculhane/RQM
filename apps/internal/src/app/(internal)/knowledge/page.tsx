@@ -54,12 +54,12 @@ export default async function KnowledgeListPage({
           name="q"
           defaultValue={searchParams.q ?? ''}
           placeholder="Search articles…"
-          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
         />
         <select
           name="status"
           defaultValue={searchParams.status ?? ''}
-          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm bg-white shadow-sm focus:border-indigo-500 focus:outline-none"
+          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm bg-white shadow-sm focus:border-brand-500 focus:outline-none"
         >
           <option value="">All statuses</option>
           <option value="draft">Draft</option>
@@ -118,7 +118,7 @@ export default async function KnowledgeListPage({
                   <td className="px-6 py-4 text-right text-sm">
                     <Link
                       href={`/knowledge/${article.id}/edit`}
-                      className="text-indigo-600 hover:text-indigo-800 font-medium"
+                      className="text-brand-600 hover:text-brand-800 font-medium"
                     >
                       Edit
                     </Link>

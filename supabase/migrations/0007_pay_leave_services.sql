@@ -122,23 +122,24 @@ CREATE TABLE requests_wgi (
 ALTER TABLE requests_name_change ENABLE ROW LEVEL SECURITY;
 ALTER TABLE requests_wgi         ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "name_change_select_employee" ON requests_name_change FOR SELECT
-  USING (EXISTS (
-    SELECT 1 FROM requests r WHERE r.id = request_id AND r.opened_by = auth.uid()
-  ));
-CREATE POLICY "name_change_select_agent" ON requests_name_change FOR SELECT
-  USING (get_my_role() IN ('hr_agent', 'hr_admin'));
-CREATE POLICY "name_change_insert" ON requests_name_change FOR INSERT
-  WITH CHECK (auth.uid() IS NOT NULL);
+-- RLS follows the same pattern as other child tables in 0003_tasks.sql:
+-- join through tasks for opened_by / team_id
 
-CREATE POLICY "wgi_select_employee" ON requests_wgi FOR SELECT
-  USING (EXISTS (
-    SELECT 1 FROM requests r WHERE r.id = request_id AND r.opened_by = auth.uid()
-  ));
-CREATE POLICY "wgi_select_agent" ON requests_wgi FOR SELECT
-  USING (get_my_role() IN ('hr_agent', 'hr_admin'));
-CREATE POLICY "wgi_insert" ON requests_wgi FOR INSERT
-  WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "name_change_all" ON requests_name_change FOR ALL USING (
+  EXISTS (SELECT 1 FROM tasks t WHERE t.id = request_id AND (
+    (get_my_role() = 'employee' AND t.opened_by = auth.uid()) OR
+    (get_my_role() = 'hr_agent' AND t.team_id = get_my_team_id()) OR
+    get_my_role() = 'hr_admin'
+  ))
+);
+
+CREATE POLICY "wgi_all" ON requests_wgi FOR ALL USING (
+  EXISTS (SELECT 1 FROM tasks t WHERE t.id = request_id AND (
+    (get_my_role() = 'employee' AND t.opened_by = auth.uid()) OR
+    (get_my_role() = 'hr_agent' AND t.team_id = get_my_team_id()) OR
+    get_my_role() = 'hr_admin'
+  ))
+);
 
 -- ============================================================
 -- Update create_request RPC
@@ -151,28 +152,35 @@ CREATE OR REPLACE FUNCTION create_request(
 )
 RETURNS UUID AS $$
 DECLARE
-  v_service    services%ROWTYPE;
-  v_request_id UUID;
+  v_service  services%ROWTYPE;
+  v_task_id  UUID;
 BEGIN
   SELECT * INTO v_service FROM services WHERE slug = p_service_slug AND enabled = TRUE;
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Service not found or disabled: %', p_service_slug;
   END IF;
 
-  INSERT INTO requests (opened_by, opened_for, service_id, team_id, description)
-  VALUES (auth.uid(), auth.uid(), v_service.id, v_service.team_id, p_description)
-  RETURNING id INTO v_request_id;
+  -- Insert the root task
+  INSERT INTO tasks (opened_by, opened_for, team_id, description)
+  VALUES (auth.uid(), auth.uid(), v_service.team_id, p_description)
+  RETURNING id INTO v_task_id;
 
+  -- Insert the request (service link)
+  INSERT INTO requests (id, service_id)
+  VALUES (v_task_id, v_service.id);
+
+  -- Audit
   INSERT INTO activity (request_id, actor_id, type)
-  VALUES (v_request_id, auth.uid(), 'created');
+  VALUES (v_task_id, auth.uid(), 'created');
 
+  -- Insert service-specific detail row
   CASE p_service_slug
     WHEN 'hiring-request' THEN
       INSERT INTO requests_hiring (
         request_id, job_title, department, headcount_type,
         target_start_date, hiring_manager, is_budgeted
       ) VALUES (
-        v_request_id,
+        v_task_id,
         p_fields->>'job_title',
         p_fields->>'department',
         (p_fields->>'headcount_type')::headcount_type_enum,
@@ -185,7 +193,7 @@ BEGIN
       INSERT INTO requests_benefits_inquiry (
         request_id, inquiry_type, coverage_type, preferred_contact
       ) VALUES (
-        v_request_id,
+        v_task_id,
         (p_fields->>'inquiry_type')::inquiry_type_enum,
         (p_fields->>'coverage_type')::coverage_type_enum,
         p_fields->>'preferred_contact'
@@ -195,7 +203,7 @@ BEGIN
       INSERT INTO requests_system_access (
         request_id, system_name, access_type, justification, required_by_date
       ) VALUES (
-        v_request_id,
+        v_task_id,
         p_fields->>'system_name',
         (p_fields->>'access_type')::access_type_enum,
         p_fields->>'justification',
@@ -206,7 +214,7 @@ BEGIN
       INSERT INTO requests_change_of_address (
         request_id, address_line1, address_line2, city, province_state, postal_zip, effective_date
       ) VALUES (
-        v_request_id,
+        v_task_id,
         p_fields->>'address_line1',
         NULLIF(p_fields->>'address_line2', ''),
         p_fields->>'city',
@@ -219,7 +227,7 @@ BEGIN
       INSERT INTO requests_direct_deposit (
         request_id, bank_name, account_type, effective_date
       ) VALUES (
-        v_request_id,
+        v_task_id,
         p_fields->>'bank_name',
         (p_fields->>'account_type')::account_type_enum,
         NULLIF(p_fields->>'effective_date', '')::DATE
@@ -227,17 +235,17 @@ BEGIN
 
     WHEN 'name-change' THEN
       INSERT INTO requests_name_change (request_id, new_last_name)
-      VALUES (v_request_id, p_fields->>'new_last_name');
+      VALUES (v_task_id, p_fields->>'new_last_name');
 
     WHEN 'where-is-my-wgi' THEN
       INSERT INTO requests_wgi (request_id, eligibility_date)
-      VALUES (v_request_id, (p_fields->>'eligibility_date')::DATE);
+      VALUES (v_task_id, (p_fields->>'eligibility_date')::DATE);
 
     ELSE
       -- Inquiry-type services require no child table; description field is sufficient.
       NULL;
   END CASE;
 
-  RETURN v_request_id;
+  RETURN v_task_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

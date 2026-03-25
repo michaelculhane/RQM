@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import type { Request, Comment, Activity, Profile } from '@/lib/types'
+import type { Request, Comment, Activity, Profile, RequestTask, FormTemplate } from '@/lib/types'
 import Badge from '@/components/ui/Badge'
 import StatusSelect from '@/components/requests/StatusSelect'
 import PrioritySelect from '@/components/requests/PrioritySelect'
@@ -9,6 +9,8 @@ import AssignSelect from '@/components/requests/AssignSelect'
 import CommentForm from '@/components/requests/CommentForm'
 import ServiceFields from '@/components/requests/ServiceFields'
 import ActivityTimeline from '@/components/requests/ActivityTimeline'
+import RequestTaskList from '@/components/requests/RequestTaskList'
+import CreateRequestTaskForm from '@/components/requests/CreateRequestTaskForm'
 import { statusColor, statusLabel, priorityColor, priorityLabel, formatDate } from '@/lib/utils'
 
 interface RequestPageProps {
@@ -82,9 +84,33 @@ export default async function RequestDetailPage({ params }: RequestPageProps) {
     .in('role', ['hr_agent', 'hr_admin'])
     .order('full_name')
 
+  // 6. Request tasks
+  const { data: requestTasksRaw } = await supabase
+    .from('request_tasks')
+    .select('*, assignee:profiles!request_tasks_assigned_to_fkey(*), form_templates(*)')
+    .eq('request_id', id)
+    .order('created_at', { ascending: true })
+
+  // 7. Active form templates for task creation
+  const { data: formTemplatesRaw } = await supabase
+    .from('form_templates')
+    .select('id, name')
+    .eq('is_active', true)
+    .order('name')
+
+  // 8. All employees for task assignment
+  const { data: employeesRaw } = await supabase
+    .from('profiles')
+    .select('id, full_name, email')
+    .eq('role', 'employee')
+    .order('full_name')
+
   const comments = (commentsRaw ?? []) as Comment[]
   const activity = (activityRaw ?? []) as Activity[]
   const agents = (agentsRaw ?? []) as Profile[]
+  const requestTasks = (requestTasksRaw ?? []) as RequestTask[]
+  const formTemplates = (formTemplatesRaw ?? []) as FormTemplate[]
+  const employees = (employeesRaw ?? []) as Profile[]
 
   const shortId = id.slice(0, 8).toUpperCase()
 
@@ -151,6 +177,21 @@ export default async function RequestDetailPage({ params }: RequestPageProps) {
               />
             </div>
           )}
+
+          {/* Request Tasks */}
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-gray-700">Tasks</h2>
+            </div>
+            <div className="space-y-4">
+              <RequestTaskList tasks={requestTasks} requestId={id} />
+              <CreateRequestTaskForm
+                requestId={id}
+                templates={formTemplates}
+                employees={employees}
+              />
+            </div>
+          </div>
 
           {/* Activity & Comments */}
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
