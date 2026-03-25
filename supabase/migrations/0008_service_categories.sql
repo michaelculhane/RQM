@@ -14,6 +14,9 @@ ALTER TABLE services
 
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "categories_select" ON categories FOR SELECT USING (auth.uid() IS NOT NULL);
+CREATE POLICY "categories_insert_admin" ON categories FOR INSERT WITH CHECK (get_my_role() = 'hr_admin');
+CREATE POLICY "categories_update_admin" ON categories FOR UPDATE USING (get_my_role() = 'hr_admin');
+CREATE POLICY "categories_delete_admin" ON categories FOR DELETE USING (get_my_role() = 'hr_admin');
 
 -- ============================================================
 -- Seed categories

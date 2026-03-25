@@ -13,6 +13,25 @@ export async function toggleService(serviceId: string, enabled: boolean) {
   return { success: true }
 }
 
+export async function createCategory(name: string) {
+  const supabase = createClient()
+  const slug = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  const { data: last } = await supabase.from('categories').select('sort_order').order('sort_order', { ascending: false }).limit(1).single()
+  const sort_order = (last?.sort_order ?? 0) + 1
+  const { error } = await supabase.from('categories').insert({ name: name.trim(), slug, sort_order })
+  if (error) return { error: error.message }
+  revalidatePath('/admin/categories')
+  return { success: true }
+}
+
+export async function deleteCategory(categoryId: string) {
+  const supabase = createClient()
+  const { error } = await supabase.from('categories').delete().eq('id', categoryId)
+  if (error) return { error: error.message }
+  revalidatePath('/admin/categories')
+  return { success: true }
+}
+
 export async function updateServiceCategory(serviceId: string, categoryId: string | null) {
   const supabase = createClient()
   const { error } = await supabase
