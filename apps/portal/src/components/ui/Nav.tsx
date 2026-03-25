@@ -6,14 +6,16 @@ import type { Profile } from '@/lib/types'
 
 interface NavProps {
   profile: Profile
+  openTaskCount: number
 }
 
-export default function Nav({ profile }: NavProps) {
+export default function Nav({ profile, openTaskCount }: NavProps) {
   const pathname = usePathname()
 
   const navLinks = [
-    { href: '/services', label: 'Services' },
-    { href: '/requests', label: 'My Requests' },
+    { href: '/services',  label: 'Services' },
+    { href: '/requests',  label: 'My Requests' },
+    { href: '/tasks',     label: 'My Tasks', badge: openTaskCount > 0 ? openTaskCount : null },
     { href: '/knowledge', label: 'Knowledge Base' },
   ]
 
@@ -40,13 +42,18 @@ export default function Nav({ profile }: NavProps) {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    className={`relative flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                       active
                         ? 'bg-brand-50 text-brand-700'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                   >
                     {link.label}
+                    {link.badge != null && (
+                      <span className="inline-flex items-center justify-center min-w-[1.125rem] h-[1.125rem] rounded-full bg-brand-600 text-white text-[10px] font-bold px-1">
+                        {link.badge > 99 ? '99+' : link.badge}
+                      </span>
+                    )}
                   </Link>
                 )
               })}
@@ -55,9 +62,7 @@ export default function Nav({ profile }: NavProps) {
 
           {/* User section */}
           <div className="flex items-center gap-4">
-            <span className="hidden sm:block text-sm text-gray-600">
-              {profile.full_name}
-            </span>
+            <span className="hidden sm:block text-sm text-gray-600">{profile.full_name}</span>
             <form action={logout} className="flex items-center">
               <button
                 type="submit"
@@ -77,13 +82,18 @@ export default function Nav({ profile }: NavProps) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   active
                     ? 'bg-brand-50 text-brand-700'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
                 {link.label}
+                {link.badge != null && (
+                  <span className="inline-flex items-center justify-center min-w-[1.125rem] h-[1.125rem] rounded-full bg-brand-600 text-white text-[10px] font-bold px-1">
+                    {link.badge > 99 ? '99+' : link.badge}
+                  </span>
+                )}
               </Link>
             )
           })}

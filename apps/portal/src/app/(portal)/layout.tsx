@@ -11,21 +11,18 @@ export default async function PortalLayout({
 }) {
   const supabase = createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
-  if (!user) {
-    redirect('/login')
-  }
+  const [{ data: profile }, { count: openTaskCount }] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', user.id).single(),
+    supabase
+      .from('request_tasks')
+      .select('id', { count: 'exact', head: true })
+      .eq('assigned_to', user.id)
+      .eq('status', 'open'),
+  ])
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
-  // Provide a fallback profile if the DB row isn't present yet
   const safeProfile: Profile = profile ?? {
     id: user.id,
     email: user.email ?? '',
@@ -36,7 +33,7 @@ export default async function PortalLayout({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Nav profile={safeProfile} />
+      <Nav profile={safeProfile} openTaskCount={openTaskCount ?? 0} />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>

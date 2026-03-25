@@ -73,6 +73,47 @@ export interface Activity {
   actor?: Profile
 }
 
+export type RequestTaskStatus = 'open' | 'completed' | 'cancelled'
+export type FormFieldType = 'text' | 'textarea' | 'date' | 'select' | 'checkbox' | 'file'
+
+export interface FormTemplateField {
+  id: string
+  form_template_id: string
+  field_name: string
+  label: string
+  field_type: FormFieldType
+  options: string[] | null
+  is_required: boolean
+  is_pii: boolean
+  display_order: number
+  request_field_mapping: { target_table: string; target_field: string } | null
+}
+
+export interface FormTemplate {
+  id: string
+  name: string
+  description: string | null
+  is_active: boolean
+  form_template_fields?: FormTemplateField[]
+}
+
+export interface RequestTask {
+  id: string
+  request_id: string
+  form_template_id: string | null
+  title: string
+  status: RequestTaskStatus
+  assigned_to: string | null
+  due_date: string | null
+  created_at: string
+  completed_at: string | null
+  form_templates?: FormTemplate
+  requests?: {
+    service_id: string
+    services?: { name: string; slug: string }
+  }
+}
+
 export type ArticleStatus = 'draft' | 'published' | 'retired'
 
 export interface KnowledgeArticle {
