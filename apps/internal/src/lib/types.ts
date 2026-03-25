@@ -46,14 +46,23 @@ export interface Team {
   slug: string
 }
 
+export interface Category {
+  id: string
+  name: string
+  slug: string
+  sort_order: number
+}
+
 export interface Service {
   id: string
   name: string
   slug: string
   team_id: string
+  category_id: string | null
   description: string | null
   enabled: boolean
   teams?: Team
+  categories?: Category
 }
 
 export interface Profile {

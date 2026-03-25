@@ -1,50 +1,52 @@
 import { createClient } from '@/lib/supabase/server'
-import ServiceCard from '@/components/services/ServiceCard'
-import type { Service, Category } from '@/lib/types'
+import Link from 'next/link'
+import type { Category } from '@/lib/types'
+
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  'compensation': (
+    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+        d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  'leave-programs': (
+    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+        d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+    </svg>
+  ),
+  'hr-systems': (
+    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+        d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 7.409A2.25 2.25 0 012.25 5.493V5.25" />
+    </svg>
+  ),
+}
+
+const CATEGORY_COLORS: Record<string, { bg: string; icon: string; border: string }> = {
+  'compensation':   { bg: 'bg-emerald-50', icon: 'text-emerald-600', border: 'border-emerald-100' },
+  'leave-programs': { bg: 'bg-blue-50',    icon: 'text-blue-600',    border: 'border-blue-100'    },
+  'hr-systems':     { bg: 'bg-violet-50',  icon: 'text-violet-600',  border: 'border-violet-100'  },
+}
+
+const DEFAULT_COLOR = { bg: 'bg-gray-50', icon: 'text-gray-500', border: 'border-gray-100' }
 
 export default async function ServicesPage() {
   const supabase = createClient()
 
-  const [{ data: services, error }, { data: categories }] = await Promise.all([
-    supabase
-      .from('services')
-      .select('*, teams(*), categories(*)')
-      .eq('enabled', true)
-      .order('name'),
-    supabase
-      .from('categories')
-      .select('*')
-      .order('sort_order'),
+  const [{ data: categories }, { data: services }] = await Promise.all([
+    supabase.from('categories').select('*').order('sort_order'),
+    supabase.from('services').select('category_id').eq('enabled', true),
   ])
 
-  if (error) {
-    return (
-      <div className="text-center py-12 text-red-600">
-        Failed to load services. Please try again.
-      </div>
-    )
+  const countByCategory: Record<string, number> = {}
+  for (const svc of services ?? []) {
+    if (svc.category_id) {
+      countByCategory[svc.category_id] = (countByCategory[svc.category_id] ?? 0) + 1
+    }
   }
 
-  const allServices = (services ?? []) as Service[]
   const allCategories = (categories ?? []) as Category[]
-
-  // Group services by category, uncategorized services fall into a catch-all
-  const grouped: Record<string, Service[]> = {}
-  for (const service of allServices) {
-    const key = service.categories?.id ?? '__uncategorized__'
-    if (!grouped[key]) grouped[key] = []
-    grouped[key].push(service)
-  }
-
-  // Order sections: sorted categories first, then uncategorized
-  const sections: { label: string; services: Service[] }[] = [
-    ...allCategories
-      .filter((c) => grouped[c.id]?.length)
-      .map((c) => ({ label: c.name, services: grouped[c.id] })),
-    ...(grouped['__uncategorized__']?.length
-      ? [{ label: 'Other', services: grouped['__uncategorized__'] }]
-      : []),
-  ]
 
   return (
     <div>
@@ -55,28 +57,40 @@ export default async function ServicesPage() {
         </p>
       </div>
 
-      {sections.length === 0 ? (
+      {allCategories.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-          <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-          </svg>
-          <h3 className="mt-4 text-sm font-medium text-gray-900">No services available</h3>
+          <h3 className="text-sm font-medium text-gray-900">No services available</h3>
           <p className="mt-1 text-sm text-gray-500">Services will appear here once they are configured.</p>
         </div>
       ) : (
-        <div className="space-y-10">
-          {sections.map(({ label, services: sectionServices }) => (
-            <section key={label}>
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
-                {label}
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {sectionServices.map((service) => (
-                  <ServiceCard key={service.id} service={service} />
-                ))}
-              </div>
-            </section>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {allCategories.map((category) => {
+            const colors = CATEGORY_COLORS[category.slug] ?? DEFAULT_COLOR
+            const icon = CATEGORY_ICONS[category.slug]
+            const count = countByCategory[category.id] ?? 0
+            return (
+              <Link
+                key={category.id}
+                href={`/services/${category.slug}`}
+                className="group bg-white rounded-xl border border-gray-200 shadow-sm p-6 flex items-start gap-4 hover:shadow-md hover:border-gray-300 transition-all"
+              >
+                <div className={`flex-shrink-0 rounded-lg p-3 ${colors.bg} ${colors.border} border`}>
+                  <span className={colors.icon}>{icon}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-base font-semibold text-gray-900 group-hover:text-brand-600 transition-colors">
+                    {category.name}
+                  </h2>
+                  <p className="mt-0.5 text-sm text-gray-500">
+                    {count} {count === 1 ? 'service' : 'services'}
+                  </p>
+                </div>
+                <svg className="flex-shrink-0 w-5 h-5 text-gray-300 group-hover:text-brand-400 transition-colors mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            )
+          })}
         </div>
       )}
     </div>

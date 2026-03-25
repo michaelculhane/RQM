@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import ServiceToggle from '@/components/admin/ServiceToggle'
-import type { Service } from '@/lib/types'
+import type { Service, Category } from '@/lib/types'
 
 export default async function AdminServicesPage() {
   const supabase = createClient()
@@ -28,27 +28,36 @@ export default async function AdminServicesPage() {
     )
   }
 
-  const { data: services } = await supabase
-    .from('services')
-    .select('*, teams(*)')
-    .order('name')
+  const [{ data: services }, { data: categories }] = await Promise.all([
+    supabase.from('services').select('*, teams(*), categories(*)').order('name'),
+    supabase.from('categories').select('*').order('sort_order'),
+  ])
 
   const allServices = (services ?? []) as Service[]
+  const allCategories = (categories ?? []) as Category[]
 
-  // Group by team
+  // Group by category
+  const categoryMap = Object.fromEntries(allCategories.map((c) => [c.id, c.name]))
+
   const grouped = allServices.reduce<Record<string, Service[]>>((acc, svc) => {
-    const teamName = svc.teams?.name ?? 'Unassigned'
-    if (!acc[teamName]) acc[teamName] = []
-    acc[teamName].push(svc)
+    const key = svc.category_id ? (categoryMap[svc.category_id] ?? 'Uncategorized') : 'Uncategorized'
+    if (!acc[key]) acc[key] = []
+    acc[key].push(svc)
     return acc
   }, {})
+
+  // Order: categories in sort_order, then uncategorized
+  const sectionOrder = [
+    ...allCategories.map((c) => c.name).filter((n) => grouped[n]),
+    ...(grouped['Uncategorized'] ? ['Uncategorized'] : []),
+  ]
 
   return (
     <div className="p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Services</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Enable or disable services available to employees.
+          Enable or disable services and assign them to categories.
         </p>
       </div>
 
@@ -56,16 +65,16 @@ export default async function AdminServicesPage() {
         <p className="text-sm text-gray-500">No services found.</p>
       ) : (
         <div className="space-y-6">
-          {Object.entries(grouped).map(([teamName, teamServices]) => (
-            <div key={teamName} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+          {sectionOrder.map((sectionName) => (
+            <div key={sectionName} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
               <div className="px-5 py-3 bg-gray-50 border-b border-gray-200">
                 <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  {teamName}
+                  {sectionName}
                 </h2>
               </div>
               <div className="divide-y divide-gray-100">
-                {teamServices.map((svc) => (
-                  <ServiceToggle key={svc.id} service={svc} />
+                {grouped[sectionName].map((svc) => (
+                  <ServiceToggle key={svc.id} service={svc} categories={allCategories} />
                 ))}
               </div>
             </div>
