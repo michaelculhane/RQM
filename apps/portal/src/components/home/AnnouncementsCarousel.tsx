@@ -52,7 +52,7 @@ export default function AnnouncementsCarousel({ announcements }: { announcements
       {/* Slides */}
       <div
         className="flex h-full transition-transform duration-500 ease-in-out"
-        style={{ transform: `translateX(-${current * 100}%)`, width: `${count * 100}%` }}
+        style={{ transform: `translateX(-${current * (100 / count)}%)`, width: `${count * 100}%` }}
       >
         {announcements.map((ann) => {
           const slideBg = ann.image_url

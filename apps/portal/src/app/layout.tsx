@@ -7,6 +7,7 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'HR Portal',
   description: 'Employee HR Self-Service Portal',
+  icons: { icon: '/favicon.png' },
 }
 
 export default function RootLayout({
